@@ -1,0 +1,38 @@
+from mp_api.client import MPRester
+import matplotlib.pyplot as plt
+import pandas as pd
+
+# This is for easily inserting your API Key for use
+My_API_Key = "INSERT YOUR API KEY HERE"
+
+# List of transition metals (individual elements)
+transition_metals = ["Sc", "Ti", "V", "Cr", "Mn", "Fe", "Co", "Ni", "Cu", "Zn",
+                     "Y", "Zr", "Nb", "Mo", "Tc", "Ru", "Rh", "Pd", "Ag", "Cd",
+                     "Hf", "Ta", "W", "Re", "Os", "Ir", "Pt", "Au", "Hg"]
+
+# Connects to Materials Project
+with MPRester(My_API_Key) as mpr:
+    metallic_counts = []
+    
+    for element in transition_metals:
+        # Search for all materials containing this element
+        docs = mpr.materials.summary.search(
+            elements=[element],
+            fields=["material_id", "is_metal"]
+        )
+        
+        # Count how many are metals
+        num_metallic = sum(1 for doc in docs if doc.is_metal)
+        num_total = len(docs)
+        metallic_fraction = num_metallic / num_total if num_total > 0 else 0
+        metallic_counts.append(metallic_fraction)
+
+# Create bar plot of metallic fraction
+plt.figure(figsize=(12, 6))
+plt.bar(transition_metals, metallic_counts, color="steelblue")
+plt.ylabel("Fraction of Metallic Compounds")
+plt.xlabel("Transition Metal")
+plt.title("Electrical Conductivity Proxy: Metallic Character of Transition Metal Compounds")
+plt.grid(True, alpha=0.3)
+plt.tight_layout()
+plt.show()
