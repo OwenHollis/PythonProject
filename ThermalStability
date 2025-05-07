@@ -1,0 +1,31 @@
+from mp_api.client import MPRester
+import matplotlib.pyplot as plt
+import pandas as pd
+
+My_API_Key = "INSERT YOUR API KEY HERE"
+
+transition_metals = ["Sc", "Ti", "V", "Cr", "Mn", "Fe", "Co", "Ni", "Cu", "Zn",
+                     "Y", "Zr", "Nb", "Mo", "Tc", "Ru", "Rh", "Pd", "Ag", "Cd",
+                     "Hf", "Ta", "W", "Re", "Os", "Ir", "Pt", "Au", "Hg"]
+
+avg_densities = []
+
+with MPRester(My_API_Key) as mpr:
+    for element in transition_metals:
+        docs = mpr.materials.summary.search(
+            elements=[element],
+            fields=["material_id", "density"]
+        )
+        densities = [doc.density for doc in docs if doc.density is not None]
+        avg_density = sum(densities) / len(densities) if densities else None
+        avg_densities.append(avg_density)
+
+# Plot density as proxy for melting point
+plt.figure(figsize=(12, 6))
+plt.bar(transition_metals, avg_densities, color="seagreen")
+plt.ylabel("Average Density (g/cm³)")
+plt.xlabel("Transition Metal")
+plt.title("Thermal Stability Proxy: Average Density of Transition Metal Compounds")
+plt.grid(True, alpha=0.3)
+plt.tight_layout()
+plt.show()
