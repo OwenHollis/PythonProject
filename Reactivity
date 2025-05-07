@@ -1,0 +1,31 @@
+from mp_api.client import MPRester
+import matplotlib.pyplot as plt
+import pandas as pd
+
+My_API_Key = "INSERT YOUR API KEY HERE"
+
+transition_metals = ["Sc", "Ti", "V", "Cr", "Mn", "Fe", "Co", "Ni", "Cu", "Zn",
+                     "Y", "Zr", "Nb", "Mo", "Tc", "Ru", "Rh", "Pd", "Ag", "Cd",
+                     "Hf", "Ta", "W", "Re", "Os", "Ir", "Pt", "Au", "Hg"]
+
+avg_hull_energies = []
+
+with MPRester(My_API_Key) as mpr:
+    for element in transition_metals:
+        docs = mpr.materials.summary.search(
+            elements=[element],
+            fields=["material_id", "energy_above_hull"]
+        )
+        energies = [doc.energy_above_hull for doc in docs if doc.energy_above_hull is not None]
+        avg_energy = sum(energies) / len(energies) if energies else None
+        avg_hull_energies.append(avg_energy)
+
+# Plot average energy above hull
+plt.figure(figsize=(12, 6))
+plt.bar(transition_metals, avg_hull_energies, color="darkorange")
+plt.ylabel("Average Energy Above Hull (eV)")
+plt.xlabel("Transition Metal")
+plt.title("Reactivity Proxy: Average Energy Above Hull")
+plt.grid(True, alpha=0.3)
+plt.tight_layout()
+plt.show()
